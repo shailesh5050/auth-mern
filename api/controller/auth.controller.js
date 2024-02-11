@@ -51,3 +51,49 @@ export async function signin(req, res, next) {
     next(errorHandler(500, err.message));
   }
 }
+export async function googleAuth(req, res, next) {
+  const { name, email, photo } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      //random 8 digit password
+      const password = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcryptjs.hash(password, 10);
+      const newUser = new User({
+        username:
+          name.split(" ").join("").toLowerCase() +
+          (Math.floor(Math.random() * (10000 - 10 + 1)) + 10).toString(),
+        email,
+        password: hashedPassword,
+        profilePicture: photo,
+      });
+      const userRes = await newUser.save();
+      // excluede password from user data
+      delete userRes.password;
+
+      const token = jwt.sign(
+        { email: userRes.email, id: userRes._id },
+        process.env.JWT
+      );
+      res
+        .cookie("access_token", token, { httpOnly: true })
+        .status(201)
+        .json({ ...userRes._doc, message: "User Created Successfully" });
+      return;
+    }
+    const token = jwt.sign(
+      { email: user.email, id: user._id },
+      process.env.JWT
+    );
+    // Exclude password from user data
+    const userData = { ...user._doc };
+    delete userData.password;
+    res
+      .cookie("access_token", token, { httpOnly: true })
+      .status(200)
+      .json({ ...userData, message: "Sign In Success" });
+  } catch (error) {
+    next(errorHandler(500, error.message));
+  }
+}
