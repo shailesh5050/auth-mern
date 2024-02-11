@@ -4,7 +4,7 @@ import bcryptjs from "bcrypt";
 import jwt from "jsonwebtoken";
 export async function signup(req, res, next) {
   const { username, email, password } = req.body;
-  console.log(req.body);
+
   const user = await User.findOne({ username });
   if (user) {
     next(errorHandler(200, "User already Exist"));
