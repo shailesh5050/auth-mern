@@ -40,3 +40,18 @@ export async function updateUser(req, res, next) {
     errorHandler(500, error.message);
   }
 }
+export async function deleteUser(req, res, next) {
+  const { id } = req.params;
+
+  // Check if the user is authorized to update this profile
+  if (req.user.id !== id) {
+    return next(errorHandler(403, "Forbidden"));
+  }
+  try {
+    await User.findByIdAndDelete(id);
+
+    res.json({ message: "User Deleted Success", success: true }).status(200);
+  } catch (error) {
+    next(error);
+  }
+}
