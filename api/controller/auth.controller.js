@@ -97,3 +97,10 @@ export async function googleAuth(req, res, next) {
     next(errorHandler(500, error.message));
   }
 }
+
+export function signout(req, res) {
+  res
+    .clearCookie("access_token")
+    .status(200)
+    .json({ message: "Sign Out Success" });
+}

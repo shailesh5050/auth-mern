@@ -8,7 +8,11 @@ import {
 } from "firebase/storage";
 import { useNavigate } from "react-router-dom";
 import { authFirebase } from "../firebase";
-import { updateUserSuccess, deleteUserSuccess } from "../redux/userSlice";
+import {
+  updateUserSuccess,
+  deleteUserSuccess,
+  signOutSuccess,
+} from "../redux/userSlice";
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -88,6 +92,24 @@ export default function Profile() {
     }
   }
 
+  async function signOut() {
+    try {
+      const res = await fetch(`/api/auth/signout`, {
+        method: "GET",
+        headers: {
+          "Content-type": "application/json",
+        },
+      });
+      const data = await res.json();
+      // dispatch(updateUserSuccess(data));
+      alert(data.message);
+      dispatch(signOutSuccess());
+      navigate("/sign-in");
+    } catch (error) {
+      alert(error.message);
+    }
+  }
+
   return (
     <div className="p-3 max-w-lg mx-auto">
       <h1 className="text-3xl font-semibold text-center my-7">Profile</h1>
@@ -149,7 +171,9 @@ export default function Profile() {
         <span onClick={deleteUser} className="text-red-700 cursor-pointer">
           Delete Account
         </span>
-        <span className="text-red-700 cursor-pointer">Sign out</span>
+        <span className="text-red-700 cursor-pointer" onClick={signOut}>
+          Sign out
+        </span>
       </div>
       <p className="text-red-700 mt-5">{error && "Something went wrong!"}</p>
       <p className="text-green-700 mt-5">User is updated successfully!</p>
